@@ -3,10 +3,16 @@ body{
     width: 100vw;
     height: auto;
 }
+p{
+    font: Helvetica, sans-serif;
+}
 h1{
     font: 30px Helvetica, sans-serif;
     color: #411f00;
     margin: 0;
+}
+p, h2{
+    font-family: Helvetica, sans-serif;
 }
 .title{
     background-color: rgb(255, 208, 147);
@@ -45,7 +51,7 @@ nav{
 }
 
 section{
-    /* display: none; */
+    display: none;
     margin-left: 20px;
 }
 
@@ -79,14 +85,32 @@ section{
     padding: 10px;
 }
 
+.albumTitle {
+    display: block;
+    max-width: 150px;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.searchButton{
+    background-color: #fce788;
+    font-family: Helvetica, sans-serif;
+    font-size: 16px;
+}
+#searchbar{
+    border: 3px solid black;
+    border-radius: 5px;
+}
+
 .AlbumDetails{
     display: inline-block;
     position: absolute;
     top: 0;
+    padding-right: 5px;
 }
 
 img{
-    height: 150px;
+    width: 200px;
     margin-bottom: 10px;
 }
 

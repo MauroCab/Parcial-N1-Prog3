@@ -20,14 +20,21 @@ function convertirSegundos(segundos) {
   return `${formato(horas)}:${formato(minutos)}:${formato(segs)}`;
 }
 
+// Link para pedir autorización a la API
 // https://cors-anywhere.herokuapp.com/corsdemo
 
 function buscarAlbumes() {
   const termino = document.getElementById('searchbar').value;
   const url = `https://cors-anywhere.herokuapp.com/https://api.deezer.com/search/album?q=${encodeURIComponent(termino)}`;
-  
+
   fetch(url)
-    .then(res => res.json())
+    .then(res => {
+      if (res.status === 429) {
+        alert("Has hecho demasiadas solicitudes. Esperá unos segundos e intentá de nuevo.");
+        throw new Error("Too Many Requests");
+      }
+      return res.json();
+    })
     .then(data => {
       const contenedor = document.getElementById('searchdisplay');
       contenedor.innerHTML = '';
@@ -38,23 +45,42 @@ function buscarAlbumes() {
       }
 
       data.data.slice(0, 10).forEach(album => {
-        console.log(album.release_date);
-       contenedor.innerHTML += `
-          <div class="albumItem">
-            <div class="AlbumImageAndTitle">
-                <img src="${album.cover}" alt="Portada del álbum" class="searchImageAndTitle">
-                <br><strong>${album.title}</strong></br>
-            </div>
-            <div class="AlbumDetails">
-              <p>Artista: ${album.artist.name}</p>
-              <p>Año: ${album.release_date}</p>
-              <p>Duración: ${convertirSegundos(album.duration)}</p>
-            </div>
-          </div>
-        `;
+        const albumDetallesUrl = `https://cors-anywhere.herokuapp.com/https://api.deezer.com/album/${album.id}`;
+
+        fetch(albumDetallesUrl)
+          .then(res => {
+            if (res.status === 429) {
+              alert("Has hecho demasiadas solicitudes. Esperá unos segundos e intentá de nuevo.");
+              throw new Error("Too Many Requests");
+            }
+            return res.json();
+          })
+          .then(detalles => {
+            const generos = detalles.genres?.data?.map(g => g.name).join(', ') || "Desconocido";
+
+            contenedor.innerHTML += `
+              <div class="albumItem">
+                <div class="AlbumImageAndTitle">
+                    <img src="${album.cover}" alt="Portada del álbum" class="searchImageAndTitle">
+                    <br><strong>${album.title}</strong></br>
+                </div>
+                <div class="AlbumDetails">
+                  <p>Artista: ${album.artist.name}</p>
+                  <p>Año: ${new Date(detalles.release_date).getFullYear()}</p>
+                  <p>Géneros: ${generos}</p>
+                  <p>Duración: ${convertirSegundos(detalles.duration)}</p>
+                </div>
+              </div>
+            `;
+          })
+          .catch(err => {
+            console.error(`Error al obtener detalles del álbum ID ${album.id}:`, err);
+          });
       });
     })
     .catch(err => {
       console.error('Error al obtener álbumes:', err);
     });
 }
+
+
